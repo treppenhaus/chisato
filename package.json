@@ -1,0 +1,39 @@
+{
+  "name": "chisato",
+  "version": "1.0.0",
+  "description": "Lightweight LLM agentic framework for TypeScript",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "author": "treppenhaus",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build",
+    "test": "npx ts-node test.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/treppenhaus/chisato.git"
+  },
+  "keywords": [
+    "llm",
+    "agent",
+    "ai",
+    "typescript",
+    "framework",
+    "agentic"
+  ],
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/treppenhaus/chisato/issues"
+  },
+  "homepage": "https://github.com/treppenhaus/chisato#readme",
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "@types/node": "^20.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
+}
