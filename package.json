@@ -1,5 +1,5 @@
 {
-  "name": "chisato",
+  "name": "@treppenhaus/chisato",
   "version": "1.0.0",
   "description": "Lightweight LLM agentic framework for TypeScript",
   "main": "dist/index.js",
@@ -14,6 +14,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/treppenhaus/chisato.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
   "keywords": [
     "llm",
