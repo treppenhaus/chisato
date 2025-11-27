@@ -1,21 +1,16 @@
-# Chisato 🤖
+# Chisato 
 
 A lightweight, extensible TypeScript framework for building LLM-powered agents with custom actions and pluggable LLM providers.
 
 ## Features
 
-- **🔌 Provider Agnostic**: Use any LLM service (OpenAI, Anthropic, local models, etc.)
-- **⚡ Simple API**: Easy to use and integrate into your projects
-- **🛠️ Custom Actions**: Create your own agent capabilities with a simple interface
-- **🤖 Automatic Action Handling**: Actions are automatically added to system prompts and executed
-- **🔄 Conversation Loop**: Handles multi-turn interactions with automatic action execution
-- **📝 TypeScript First**: Full type safety and IntelliSense support
+- **Provider Agnostic**: Use any LLM service (OpenAI, Anthropic, local models, etc.)
+- **Simple API**: Easy to use and integrate into your projects
+- **Custom Actions**: Create your own agent capabilities with a simple interface
+- **Automatic Action Handling**: Actions are automatically added to system prompts and executed
+- **Conversation Loop**: Handles multi-turn interactions with automatic action execution
+- **TypeScript First**: Full type safety and IntelliSense support
 
-## Installation
-
-```bash
-npm install chisato
-```
 
 ## Quick Start
 
