@@ -2,32 +2,55 @@ import { ActionCall, ActionResult } from '../interfaces/types';
 
 /**
  * Parse action calls from LLM response
- * @param response - The LLM response text
- * @returns Array of parsed action calls
+ * Handles nested JSON objects properly by tracking brace count
  */
 export function parseActionCalls(response: string): ActionCall[] {
     const actionCalls: ActionCall[] = [];
+    
+    // Parse character by character to find complete JSON objects
+    // this is needed because the LLM would produce wrong json from time to time and
+    // we also need to parse / adjust for lazy json which is missing brackets
+    let inJson = false;
+    let braceCount = 0;
+    let currentJson = '';
 
-    // Match JSON objects with action and parameters
-    const jsonRegex = /\{[\s\S]*?"action"[\s\S]*?"parameters"[\s\S]*?\}/g;
-    const matches = response.match(jsonRegex);
-
-    if (!matches) {
-        return actionCalls;
-    }
-
-    for (const match of matches) {
-        try {
-            const parsed = JSON.parse(match);
-            if (parsed.action && parsed.parameters) {
-                actionCalls.push({
-                    action: parsed.action,
-                    parameters: parsed.parameters
-                });
+    for (let i = 0; i < response.length; i++) {
+        const char = response[i];
+        
+        if (char === '{') {
+            if (!inJson) {
+                inJson = true;
+                braceCount = 1;
+                currentJson = '{';
+            } else {
+                braceCount++;
+                currentJson += char;
             }
-        } catch (e) {
-            // Invalid JSON, skip this match
-            continue;
+        } else if (char === '}' && inJson) {
+            currentJson += char;
+            braceCount--;
+            
+            if (braceCount === 0) {
+                // Complete JSON object found
+                if (currentJson.includes('"action"') && currentJson.includes('"parameters"')) {
+                    try {
+                        const parsed = JSON.parse(currentJson);
+                        if (parsed.action && parsed.parameters) {
+                            actionCalls.push({
+                                action: parsed.action,
+                                parameters: parsed.parameters
+                            });
+                        }
+                    } catch (e) {
+                        // Invalid JSON, skip
+                        continue;
+                    }
+                }
+                inJson = false;
+                currentJson = '';
+            }
+        } else if (inJson) {
+            currentJson += char;
         }
     }
 

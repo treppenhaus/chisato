@@ -261,7 +261,7 @@ async function testAgentLoop() {
     console.log('='.repeat(80));
 
     // OPTION 1: Use a real LLM (uncomment when you have an API key)
-    // const provider = new RealLLMProvider(process.env.OPENAI_API_KEY || 'your-api-key-here');
+    //const provider = new RealLLMProvider(process.env.OPENAI_API_KEY || 'your-api-key-here');
 
     // OPTION 2: Use simulated LLM (for testing without API key)
     const provider = new SimulatedLLMProvider();
