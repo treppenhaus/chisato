@@ -23,7 +23,12 @@ export class Agent {
         this.registry = new ActionRegistry();
         this.options = {
             maxIterations: options.maxIterations || 10,
-            systemPromptPrefix: options.systemPromptPrefix || ''
+            systemPromptPrefix: options.systemPromptPrefix || '',
+            maxRetries: options.maxRetries,
+            maxActionRetries: options.maxActionRetries,
+            onInvalidOutput: options.onInvalidOutput,
+            onActionRetry: options.onActionRetry,
+            onActionMaxRetries: options.onActionMaxRetries
         };
     }
 
@@ -56,11 +61,59 @@ export class Agent {
             // Build system prompt with actions
             const systemPrompt = this._buildSystemPrompt();
 
-            // Get agentic response from LLM (with action capabilities)
-            const response = await this.provider.sendAgenticMessage(
-                this.conversationHistory,
-                systemPrompt
-            );
+            // Try to get a valid response from LLM with retries
+            let response: string = '';
+            let validResponse = false;
+            const maxRetries = this.options.maxRetries || 3;
+
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    // Get agentic response from LLM (with action capabilities)
+                    response = await this.provider.sendAgenticMessage(
+                        this.conversationHistory,
+                        systemPrompt
+                    );
+
+                    // Validate the response is not empty
+                    if (!response || response.trim().length === 0) {
+                        throw new Error('LLM returned empty response');
+                    }
+
+                    // Validate the response
+                    const testParse = parseActionCalls(response);
+                    
+                    // Check if response looks like it's trying to call actions but failed to parse
+                    const looksLikeAction = response.includes('"action"') && response.includes('"parameters"');
+                    
+                    if (looksLikeAction && testParse.length === 0) {
+                        // Response contains action structure but parsing failed
+                        throw new Error('Response appears to contain malformed action JSON');
+                    }
+
+                    validResponse = true;
+                    break; // Success!
+
+                } catch (error) {
+                    const errorMsg = error instanceof Error ? error.message : String(error);
+                    
+                    // Call the invalid output callback
+                    if (this.options.onInvalidOutput) {
+                        this.options.onInvalidOutput(attempt, errorMsg, response);
+                    }
+
+                    if (attempt === maxRetries) {
+                        // Last attempt failed, throw error
+                        throw new Error(`LLM produced invalid output after ${maxRetries} attempts. Last error: ${errorMsg}`);
+                    }
+
+                    // Wait a bit before retry (exponential backoff)
+                    await new Promise(resolve => setTimeout(resolve, attempt * 500));
+                }
+            }
+
+            if (!validResponse) {
+                throw new Error('Failed to get valid response from LLM');
+            }
 
             // Add assistant response to history
             this.conversationHistory.push({
@@ -129,11 +182,12 @@ export class Agent {
     }
 
     /**
-     * Execute multiple actions
+     * Execute multiple actions with retry logic
      * @private
      */
     private async _executeActions(actionCalls: ActionCall[]): Promise<ActionResult[]> {
         const results: ActionResult[] = [];
+        const maxActionRetries = this.options.maxActionRetries || 2;
 
         for (const call of actionCalls) {
             const action = this.registry.getAction(call.action);
@@ -147,19 +201,45 @@ export class Agent {
                 continue;
             }
 
-            try {
-                const result = await action.execute(call.parameters);
-                results.push({
-                    action: call.action,
-                    success: true,
-                    result
-                });
-            } catch (error) {
-                results.push({
-                    action: call.action,
-                    success: false,
-                    error: error instanceof Error ? error.message : String(error)
-                });
+            // Retry logic for action execution
+            let actionSuccess = false;
+            let lastError = '';
+
+            for (let attempt = 1; attempt <= maxActionRetries; attempt++) {
+                try {
+                    const result = await action.execute(call.parameters);
+                    results.push({
+                        action: call.action,
+                        success: true,
+                        result
+                    });
+                    actionSuccess = true;
+                    break; // Success!
+
+                } catch (error) {
+                    lastError = error instanceof Error ? error.message : String(error);
+
+                    // Call retry callback
+                    if (attempt < maxActionRetries && this.options.onActionRetry) {
+                        this.options.onActionRetry(call.action, attempt, lastError);
+                    }
+
+                    if (attempt === maxActionRetries) {
+                        // Max retries reached
+                        if (this.options.onActionMaxRetries) {
+                            this.options.onActionMaxRetries(call.action, lastError);
+                        }
+
+                        results.push({
+                            action: call.action,
+                            success: false,
+                            error: `Action failed after ${maxActionRetries} attempts: ${lastError}`
+                        });
+                    } else {
+                        // Wait before retry (exponential backoff)
+                        await new Promise(resolve => setTimeout(resolve, attempt * 300));
+                    }
+                }
             }
         }
 

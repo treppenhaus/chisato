@@ -30,15 +30,25 @@ export class AgentLoop {
             maxSteps: options.maxSteps || 10,
             includeDefaultActions: options.includeDefaultActions !== false,
             systemPrompt: options.systemPrompt || this.getDefaultSystemPrompt(),
+            maxRetries: options.maxRetries || 3,
+            maxActionRetries: options.maxActionRetries || 2,
             onStepComplete: options.onStepComplete || (() => {}),
             onUserOutput: options.onUserOutput || ((msg) => console.log('[Agent]:', msg)),
-            onActionExecuted: options.onActionExecuted || (() => {})
+            onActionExecuted: options.onActionExecuted || (() => {}),
+            onInvalidOutput: options.onInvalidOutput || (() => {}),
+            onActionRetry: options.onActionRetry || (() => {}),
+            onActionMaxRetries: options.onActionMaxRetries || (() => {})
         };
 
         // Create the agent
         this.agent = new Agent(provider, {
             maxIterations: this.options.maxSteps,
-            systemPromptPrefix: this.options.systemPrompt
+            systemPromptPrefix: this.options.systemPrompt,
+            maxRetries: this.options.maxRetries,
+            maxActionRetries: this.options.maxActionRetries,
+            onInvalidOutput: this.options.onInvalidOutput,
+            onActionRetry: this.options.onActionRetry,
+            onActionMaxRetries: this.options.onActionMaxRetries
         });
 
         // Register default actions if enabled

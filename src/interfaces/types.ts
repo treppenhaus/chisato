@@ -40,4 +40,14 @@ export interface ActionResult {
 export interface AgentOptions {
     maxIterations?: number;
     systemPromptPrefix?: string;
+    /** Max retries for LLM calls when output is invalid */
+    maxRetries?: number;
+    /** Max retries per action execution when action fails */
+    maxActionRetries?: number;
+    /** Callback when LLM produces invalid output */
+    onInvalidOutput?: (attempt: number, error: string, output: string) => void;
+    /** Callback when action execution is retried */
+    onActionRetry?: (actionName: string, attempt: number, error: string) => void;
+    /** Callback when action reaches max retries */
+    onActionMaxRetries?: (actionName: string, error: string) => void;
 }
