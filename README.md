@@ -4,15 +4,19 @@
 
 A lightweight, extensible TypeScript framework for building LLM-powered agents with custom actions and pluggable LLM providers.
 
-## What's New in Version 1.0.1
+## What's New in Version 1.0.2
 
-- **AgentLoop System**: Autonomous task execution with automatic action recognition
-- **Dual LLM Methods**: Separate `sendAgenticMessage` and `sendMessage` for better control
-- **LLM-Driven Decisions**: Let the LLM decide when to use actions vs. normal responses
-- **Retry System**: Automatic retry logic for both LLM failures and action failures
-- **Action Tracking**: Full visibility into executed actions with callbacks
-- **Enhanced Error Handling**: Comprehensive error handling with exponential backoff
-- **Default Actions**: Built-in `user_output` and `query_llm` actions
+- **Critical Fix**: Agent now correctly processes only the most recent user message
+- **Improved Termination**: No "DONE" keyword needed - automatically terminates after `user_output`
+- **Better Context Handling**: History is maintained for context but not re-processed
+- **More Intuitive**: Natural conversation flow with automatic loop termination
+- **Previous features from 1.0.1**:
+  - AgentLoop System with autonomous task execution
+  - Dual LLM Methods: `sendAgenticMessage` and `sendMessage`
+  - LLM-Driven Decisions: LLM decides when to use actions
+  - Retry System: Automatic retry logic for failures
+  - Action Tracking: Full visibility with callbacks
+  - Default Actions: Built-in `user_output` and `query_llm`
 
 ## Table of Contents
 
