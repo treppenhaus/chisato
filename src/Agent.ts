@@ -56,8 +56,8 @@ export class Agent {
             // Build system prompt with actions
             const systemPrompt = this._buildSystemPrompt();
 
-            // Get response from LLM
-            const response = await this.provider.sendMessage(
+            // Get agentic response from LLM (with action capabilities)
+            const response = await this.provider.sendAgenticMessage(
                 this.conversationHistory,
                 systemPrompt
             );
