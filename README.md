@@ -4,7 +4,7 @@
 
 A lightweight, extensible TypeScript framework for building LLM-powered agents with custom actions and pluggable LLM providers.
 
-## What's New in Version 2.0
+## What's New in Version 1.0.1
 
 - **AgentLoop System**: Autonomous task execution with automatic action recognition
 - **Dual LLM Methods**: Separate `sendAgenticMessage` and `sendMessage` for better control
