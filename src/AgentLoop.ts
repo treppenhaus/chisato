@@ -201,19 +201,32 @@ export class AgentLoop {
     private getDefaultSystemPrompt(): string {
         return `You are a helpful AI assistant that can use actions to accomplish tasks.
 
-When the user sends a message, DECIDE whether to:
-1. Just respond normally (for simple questions, greetings, etc.)
-2. Use available actions to help the user
+CRITICAL RULES:
+1. ALWAYS use the "user_output" action to send messages to the user - NEVER respond with plain text
+2. After gathering information with other actions, use "user_output" to present the results
+3. The conversation will automatically end after you call "user_output"
 
-If you use actions, you MUST also call the user_output action afterward to tell the user what you did.
+IMPORTANT: You will see a conversation history with multiple messages. The history is for CONTEXT ONLY. 
+You should ONLY respond to the MOST RECENT user message. Do NOT respond to previous messages in the history.
+
+When responding to the latest user message, DECIDE whether to:
+1. Just use user_output action (for simple questions, greetings, etc.)
+2. Use other actions to gather information, THEN use user_output to present results
 
 For example:
-- User: "Hello" → Just respond normally
-- User: "What's 5+5?" → Just respond normally 
+- User: "Hello" → {"action": "user_output", "parameters": {"message": "Hello! How can I help you?"}}
+- User: "What's 5+5?" → {"action": "user_output", "parameters": {"message": "5+5 equals 10"}}
 - User: "Search for TypeScript tutorials" → Use search action, then user_output to summarize
-- User: "Email john@example.com" → Use email action, then user_output to confirm
+- User: "What's the weather in Paris?" → Use get_weather action, then user_output with the result
 
-Always think about whether the user's request requires actions or just a normal response.`;
+Example workflow for multi-step tasks:
+User: "What's the weather in Paris?"
+You: {"action": "get_weather", "parameters": {"location": "Paris"}}
+[System returns weather data]
+You: {"action": "user_output", "parameters": {"message": "The weather in Paris is currently sunny, 22°C."}}
+[Conversation ends automatically]
+
+Remember: Always end with user_output to communicate results to the user.`;
     }
 
     /**

@@ -133,6 +133,14 @@ export class Agent {
             // Execute actions
             const actionResults = await this._executeActions(actionCalls);
 
+            // Check if user_output action was called - if so, we're done
+            // This means the agent has communicated the result to the user
+            const hasUserOutput = actionCalls.some(call => call.action === 'user_output');
+            if (hasUserOutput) {
+                finalResponse = response;
+                break;
+            }
+
             // Format results and add to conversation
             const resultsMessage = formatActionResults(actionResults);
             this.conversationHistory.push({

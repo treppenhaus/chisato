@@ -58,6 +58,17 @@ export function parseActionCalls(response: string): ActionCall[] {
 }
 
 /**
+ * Check if the response contains the "DONE" signal
+ * This indicates the LLM has finished and should not be looped further
+ */
+export function isDoneSignal(response: string): boolean {
+    // Check if response contains "DONE" on its own line or at the end
+    const trimmed = response.trim();
+    return trimmed === 'DONE' || trimmed.endsWith('\nDONE') || /\bDONE\s*$/i.test(trimmed);
+}
+
+
+/**
  * Format action results for inclusion in the next LLM message
  * @param results - Array of action results
  * @returns Formatted string
