@@ -30,11 +30,11 @@ class RealLLMProvider implements ILLMProvider {
      */
     async sendAgenticMessage(messages: Message[], systemPrompt?: string): Promise<string> {
         console.log(`\n[LLM Agentic Call] System prompt with actions provided`);
-        
+
         // The systemPrompt already contains action definitions from AgentLoop/Agent
         // The LLM will see them and decide whether to use actions or respond normally
         // This is the key: the SYSTEM PROMPT tells the LLM what actions are available
-        
+
         return this.callLLMAPI(messages, systemPrompt);
     }
 
@@ -266,8 +266,14 @@ async function testAgentLoop() {
     // OPTION 2: Use simulated LLM (for testing without API key)
     const provider = new SimulatedLLMProvider();
 
+    // Create agent loop with default actions specified as an array
+    // Options:
+    // - ['user_output', 'query_llm'] - Include both default actions (default behavior)
+    // - ['user_output'] - Only include user_output
+    // - ['query_llm'] - Only include query_llm
+    // - [] - No default actions
     const agentLoop = new AgentLoop(provider, {
-        includeDefaultActions: true,
+        includeDefaultActions: ['user_output', 'query_llm'], // Explicitly include both
         onUserOutput: (message) => {
             console.log('\n✅ [USER OUTPUT]:', message);
         },

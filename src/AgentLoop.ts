@@ -28,16 +28,16 @@ export class AgentLoop {
         this.provider = provider;
         this.options = {
             maxSteps: options.maxSteps || 10,
-            includeDefaultActions: options.includeDefaultActions !== false,
+            includeDefaultActions: options.includeDefaultActions ?? ['user_output', 'query_llm'],
             systemPrompt: options.systemPrompt || this.getDefaultSystemPrompt(),
             maxRetries: options.maxRetries || 3,
             maxActionRetries: options.maxActionRetries || 2,
-            onStepComplete: options.onStepComplete || (() => {}),
+            onStepComplete: options.onStepComplete || (() => { }),
             onUserOutput: options.onUserOutput || ((msg) => console.log('[Agent]:', msg)),
-            onActionExecuted: options.onActionExecuted || (() => {}),
-            onInvalidOutput: options.onInvalidOutput || (() => {}),
-            onActionRetry: options.onActionRetry || (() => {}),
-            onActionMaxRetries: options.onActionMaxRetries || (() => {})
+            onActionExecuted: options.onActionExecuted || (() => { }),
+            onInvalidOutput: options.onInvalidOutput || (() => { }),
+            onActionRetry: options.onActionRetry || (() => { }),
+            onActionMaxRetries: options.onActionMaxRetries || (() => { })
         };
 
         // Create the agent
@@ -51,8 +51,8 @@ export class AgentLoop {
             onActionMaxRetries: this.options.onActionMaxRetries
         });
 
-        // Register default actions if enabled
-        if (this.options.includeDefaultActions) {
+        // Register default actions based on the array
+        if (this.options.includeDefaultActions.length > 0) {
             this.registerDefaultActions();
         }
     }
@@ -131,8 +131,8 @@ export class AgentLoop {
 
                     // Check if this action was already tracked
                     const alreadyTracked = this.actionsExecuted.some(
-                        e => e.actionName === call.action && 
-                        JSON.stringify(e.parameters) === JSON.stringify(call.parameters)
+                        e => e.actionName === call.action &&
+                            JSON.stringify(e.parameters) === JSON.stringify(call.parameters)
                     );
 
                     if (!alreadyTracked) {
@@ -191,8 +191,12 @@ export class AgentLoop {
      * Register default actions
      */
     private registerDefaultActions(): void {
-        this.agent.registerAction(new UserOutputAction());
-        this.agent.registerAction(new QueryLLMAction(this.provider));
+        if (this.options.includeDefaultActions.includes('user_output')) {
+            this.agent.registerAction(new UserOutputAction());
+        }
+        if (this.options.includeDefaultActions.includes('query_llm')) {
+            this.agent.registerAction(new QueryLLMAction(this.provider));
+        }
     }
 
     /**

@@ -1,6 +1,6 @@
 {
   "name": "@treppenhaus/chisato",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Lightweight LLM agentic framework for TypeScript",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -15,7 +15,6 @@
     "type": "git",
     "url": "git+https://github.com/treppenhaus/chisato.git"
   },
-
   "keywords": [
     "llm",
     "agent",

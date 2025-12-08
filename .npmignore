@@ -1,0 +1,26 @@
+# Development files - don't publish these
+src/
+examples/
+test.ts
+tsconfig.json
+.gitignore
+
+# IDE and system files
+.DS_Store
+.vscode/
+.idea/
+*.log
+
+# Build info
+*.tsbuildinfo
+
+# Git
+.git/
+.github/
+
+# CI/CD
+.travis.yml
+.circleci/
+
+# Note: dist/ is NOT ignored here - it will be published!
+# The dist/ folder is built before publishing via prepublishOnly script

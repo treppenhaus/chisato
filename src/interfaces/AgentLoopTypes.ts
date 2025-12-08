@@ -27,8 +27,8 @@ export interface ActionExecution {
 export interface AgentLoopOptions {
     /** Maximum number of steps to execute */
     maxSteps?: number;
-    /** Whether to include default actions (user_output, query_llm) */
-    includeDefaultActions?: boolean;
+    /** Array of default action names to include. Available: 'user_output', 'query_llm'. Pass empty array for none. */
+    includeDefaultActions?: ('user_output' | 'query_llm')[];
     /** Custom system prompt for the agent */
     systemPrompt?: string;
     /** Maximum number of retries when LLM produces invalid output (default: 3) */
