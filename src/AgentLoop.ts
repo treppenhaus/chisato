@@ -67,14 +67,16 @@ export class AgentLoop {
     /**
      * Process a user message - the LLM decides whether to use actions or respond normally
      */
-    async run(userMessage: string): Promise<AgentLoopResult> {
+    async run(userMessage: string): Promise<AgentLoopResult>;
+    async run(messages: Message[]): Promise<AgentLoopResult>;
+    async run(input: string | Message[]): Promise<AgentLoopResult> {
         this.userOutputs = [];
         this.actionsExecuted = [];
 
         try {
             // Let the agent handle the message
             // The LLM will decide whether to use actions or just respond
-            const response = await this.agent.chat(userMessage);
+            const response = await this.agent.chat(input as any);
 
             // Track all actions that were executed
             this.trackExecutedActions();

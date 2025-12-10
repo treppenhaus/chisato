@@ -301,22 +301,37 @@ async function testAgentLoop() {
     console.log('-'.repeat(80));
 
     // Test scenarios
-    const scenarios = [
+    const scenarios: { name: string, message: string | Message[] }[] = [
         { name: 'Simple Greeting', message: 'Hello!' },
         { name: 'Capability Question', message: 'What can you help me with?' },
         { name: 'Search Request', message: 'Search for TypeScript tutorials' },
         { name: 'Weather Request', message: 'What\'s the weather in Tokyo?' },
         { name: 'Email Request', message: 'Send an email to john@example.com' },
-        { name: 'Math Calculation', message: 'What is 15 times 23?' }
+        { name: 'Math Calculation', message: 'What is 15 times 23?' },
+        {
+            name: 'History Injection',
+            message: [
+                { role: 'user', content: 'Context: I live in Berlin.' },
+                { role: 'assistant', content: 'Understood.' },
+                { role: 'user', content: 'What is the weather like here? (assume Berlin)' }
+            ] as Message[]
+        }
     ];
 
     for (const scenario of scenarios) {
         console.log('\n' + '='.repeat(80));
         console.log(`TEST: ${scenario.name}`);
         console.log('='.repeat(80));
-        console.log(`👤 User: "${scenario.message}"`);
 
-        const result = await agentLoop.run(scenario.message);
+        if (typeof scenario.message === 'string') {
+            console.log(`👤 User: "${scenario.message}"`);
+        } else {
+            console.log(`👤 User (History):`);
+            scenario.message.forEach(m => console.log(`   ${m.role}: "${m.content}"`));
+        }
+
+        // Use 'as any' to bypass the overload selection for the union type in this test loop
+        const result = await agentLoop.run(scenario.message as any);
 
         console.log('\n📊 RESULT:');
         console.log(`   Outputs: ${result.outputs.length}`);

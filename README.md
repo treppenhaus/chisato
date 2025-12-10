@@ -4,19 +4,20 @@
 
 A lightweight, extensible TypeScript framework for building LLM-powered agents with custom actions and pluggable LLM providers.
 
-## What's New in Version 1.0.2
+## What's New in Version 1.0.4
 
-- **Critical Fix**: Agent now correctly processes only the most recent user message
-- **Improved Termination**: No "DONE" keyword needed - automatically terminates after `user_output`
-- **Better Context Handling**: History is maintained for context but not re-processed
-- **More Intuitive**: Natural conversation flow with automatic loop termination
-- **Previous features from 1.0.1**:
+- **Flexible Input**: `AgentLoop.run` and `Agent.chat` now accept `string` or `Message[]` history
+- **Context Management**: Easily inject conversation history or context messages
+- **Type Safety**: Improved overloads for better TypeScript support
+- **Previous features from 1.0.3**:
+  - Improved termination logic
+  - Better context handling
   - AgentLoop System with autonomous task execution
   - Dual LLM Methods: `sendAgenticMessage` and `sendMessage`
-  - LLM-Driven Decisions: LLM decides when to use actions
-  - Retry System: Automatic retry logic for failures
-  - Action Tracking: Full visibility with callbacks
-  - Default Actions: Built-in `user_output` and `query_llm`
+  - LLM-Driven Decisions
+  - Retry System
+  - Action Tracking
+  - Default Actions: `user_output` and `query_llm`
 
 ## Table of Contents
 
@@ -191,6 +192,13 @@ agentLoop.registerAction(new WeatherAction());
 const result = await agentLoop.run(
   "Search for TypeScript tutorials and summarize"
 );
+
+// OR inject history/context
+const resultWithContext = await agentLoop.run([
+  { role: 'user', content: 'Context: Current location is Berlin.' },
+  { role: 'assistant', content: 'Understood.' },
+  { role: 'user', content: 'What is the weather like?' }
+]);
 ```
 
 ### Retry Configuration
@@ -241,7 +249,7 @@ new Agent(provider: ILLMProvider, options?: AgentOptions)
 **Methods:**
 
 - `registerAction(action: IAction): void` - Register an action
-- `chat(userMessage: string): Promise<string>` - Send a message and get a response
+- `chat(input: string | Message[]): Promise<string>` - Send a message or history and get a response
 - `getHistory(): Message[]` - Get conversation history
 - `clearHistory(): void` - Clear conversation history
 
@@ -272,7 +280,7 @@ new AgentLoop(provider: ILLMProvider, options?: AgentLoopOptions)
 **Methods:**
 
 - `registerAction(action: IAction): void` - Register an action
-- `run(task: string): Promise<AgentLoopResult>` - Execute a task
+- `run(task: string | Message[]): Promise<AgentLoopResult>` - Execute a task or process history
 - `getHistory(): Message[]` - Get conversation history
 - `getUserOutputs(): string[]` - Get all user outputs
 - `getActionsExecuted(): ActionExecution[]` - Get all executed actions

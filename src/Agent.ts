@@ -45,12 +45,18 @@ export class Agent {
      * @param userMessage - The user's message
      * @returns The final response from the LLM
      */
-    async chat(userMessage: string): Promise<string> {
-        // Add user message to history
-        this.conversationHistory.push({
-            role: 'user',
-            content: userMessage
-        });
+    async chat(userMessage: string): Promise<string>;
+    async chat(messages: Message[]): Promise<string>;
+    async chat(input: string | Message[]): Promise<string> {
+        // Add user message(s) to history
+        if (typeof input === 'string') {
+            this.conversationHistory.push({
+                role: 'user',
+                content: input
+            });
+        } else if (Array.isArray(input)) {
+            this.conversationHistory.push(...input);
+        }
 
         let iterations = 0;
         let finalResponse = '';
@@ -81,10 +87,10 @@ export class Agent {
 
                     // Validate the response
                     const testParse = parseActionCalls(response);
-                    
+
                     // Check if response looks like it's trying to call actions but failed to parse
                     const looksLikeAction = response.includes('"action"') && response.includes('"parameters"');
-                    
+
                     if (looksLikeAction && testParse.length === 0) {
                         // Response contains action structure but parsing failed
                         throw new Error('Response appears to contain malformed action JSON');
@@ -95,7 +101,7 @@ export class Agent {
 
                 } catch (error) {
                     const errorMsg = error instanceof Error ? error.message : String(error);
-                    
+
                     // Call the invalid output callback
                     if (this.options.onInvalidOutput) {
                         this.options.onInvalidOutput(attempt, errorMsg, response);
